@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>多行文本省略</title>
+	<meta charset="utf-8">
+</head>
+<body>
+	<p class="mapleTextareaOverFlow" rows='1' style="width:400px">
+		人生不如意常十八九，要让自己快乐，就必须给自己减压，减压的好方法就是学会忘记，人生需要能拿得起，有时候放得下更重要。
+	</p>
+	<p class="mapleTextareaOverFlow" rows='2' style="width:400px">
+		人生不如意常十八九，要让自己快乐，就必须给自己减压，减压的好方法就是学会忘记，人生需要能拿得起，有时候放得下更重要。
+	</p>
+	<p class="mapleTextareaOverFlow" rows='3' style="width:400px">
+		人生不如意常十八九，要让自己快乐，就必须给自己减压，减压的好方法就是学会忘记，人生需要能拿得起，有时候放得下更重要。
+	</p>
+
+	<script type="text/javascript">
+		const elBoxs = document.getElementsByClassName('mapleTextareaOverFlow');
+		const elBoxsLength = elBoxs.length;
+
+		for(let i = 0; i < elBoxsLength; i += 1) {
+			const el = elBoxs[i];
+			// 设置需要省略的属性及字体的两端对齐的样式
+			el.style.overflow = 'hidden';
+			el.style.textOverflow = 'ellipsis';
+			el.style.wordBreak = 'break-all';
+			el.style.wordWrap = 'break-word';
+			el.style.textAlign = 'justify';
+
+			let options = {
+				rows: parseInt(el.getAttribute('rows')),
+				isSupportlineCamp: `${el.style.webkitLineClamp}` !== 'undefined',
+			};
+
+			let text = el.innerHTML;
+
+			if(options.isSupportlineCamp) {
+				el.style.webkitLineClamp = options.rows;
+				el.style.display = '-webkit-box';
+				el.style.webkitBoxOrient = 'vertical';
+			} else {
+				const heightStr = getCurrentStyle(el, 'height');
+				const height = getNumber(heightStr);
+				const maxHeight = getMaxHeight(el, options.rows, text);
+				if(height > maxHeight) {
+					subStrChar(el, maxHeight, text);
+				} else {
+					el.innerHTML = text;
+				}
+			}
+		};
+
+		function subStrChar(el, maxHeight, text) {
+			console.log(maxHeight);
+			let end = false;
+			let i = 0;
+			while(!end) {
+				i++;
+				el.innerHTML = text.substring(0, i) + '...';
+				const currentHeightStr = getCurrentStyle(el, 'height');
+				const currentHeight = getNumber(currentHeightStr);
+				if(currentHeight > maxHeight) {
+					el.innerHTML = text.substring(0, i - 1) + '...';
+					end = true;
+				}
+				if(i >= text.length) {
+					break;
+				}
+			}
+		}
+
+		function getMaxHeight(el, rows, text) {
+			const lineHeight = getCurrentStyle(el, 'lineHeight');
+			let number = 0;
+
+			if(lineHeight === 'normal') {
+				let index = 0;
+				do {
+					el.innerHTML = text[index++];
+				} while(!getNumber(getCurrentStyle(el, 'height')));
+				number = getNumber(getCurrentStyle(el, 'height'));
+			} else {
+				number = getNumber(lineHeight);
+			}
+
+			return number * rows;
+		}
+
+		function getCurrentStyle(el, elAttr) {
+			return window.getComputedStyle(el)[elAttr]
+		}
+
+		function getNumber(str) {
+			let number = parseFloat(str);
+			return Math.ceil(number)
+		}
+	</script>
+</body>
+</html>
